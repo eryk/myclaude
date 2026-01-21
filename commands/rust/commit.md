@@ -3,7 +3,7 @@ allowed-tools: all
 description: "Run Cargo Clippy and Cargo Test, then commit if successful"
 ---
 
-# /tc:rust:commit - Run Cargo Clippy and Cargo Test, then commit if successful
+# /rust:commit - Run Cargo Clippy and Cargo Test, then commit if successful
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Automate Rust code quality checks and testing before committing. This command ru
 ## Usage
 
 ```
-/tc:rust:commit [commit-message]
+/rust:commit [commit-message]
 ```
 
 ## Arguments
@@ -43,8 +43,8 @@ Automate Rust code quality checks and testing before committing. This command ru
 
 ```bash
 # Run checks and commit with auto-generated message
-/tc:rust:commit
+/rust:commit
 
 # Run checks and commit with custom message
-/tc:rust:commit "feat: add new authentication module"
+/rust:commit "feat: add new authentication module"
 ```

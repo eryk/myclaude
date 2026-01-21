@@ -3,7 +3,7 @@ allowed-tools: all
 description: "Clean up Rust dependencies"
 ---
 
-# /tc:clean-deps - Clean up Rust dependencies
+# /clean-deps - Clean up Rust dependencies
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Clean up Rust dependencies.
 ## Usage
 
 ```
-/tc:clean-deps
+/clean-deps
 ```
 
 ## Execution

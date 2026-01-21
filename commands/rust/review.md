@@ -3,7 +3,7 @@ allowed-tools: all
 description: "Perform thorough code review focusing on completeness, quality, architecture, and security"
 ---
 
-# /tc:review - Perform thorough code review focusing on completeness, quality, architecture, and security
+# /rust:review - Perform thorough code review focusing on completeness, quality, architecture, and security
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Conduct comprehensive code review examining feature completeness, test quality, 
 ## Usage
 
 ```
-/tc:review [target-path]
+/rust:review [target-path]
 ```
 
 ## Arguments
