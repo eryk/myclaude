@@ -1,26 +1,25 @@
 ---
-name: rust-simplify
-description: 精简和优化 Rust 代码。清理未使用的依赖、简化冗余代码、优化 imports。修改后自动运行 cargo clippy 和 cargo test 验证。当用户提到"精简 Rust"、"优化 Rust 代码"、"清理依赖"、"简化代码"时使用。
-invocation: user
-arguments:
-  - name: target
-    description: 目标 crate 路径或名称 (可选，默认整个工作区)
-    required: false
+allowed-tools: all
+description: "精简和优化 Rust 代码，清理未使用的依赖、简化冗余代码、优化 imports"
 ---
 
-# Rust 代码精简工具
+# /rust:simplify - 精简和优化 Rust 代码
+
+## Purpose
 
 精简和优化 Rust 代码，确保修改后代码能通过 clippy 检查和测试。
 
-## 使用方式
+## Usage
 
 ```
-/rust-simplify [target]
+/rust:simplify [target-path]
 ```
 
-- `target`: 可选，指定要精简的 crate 路径或包名 (如 `crates/my-crate` 或 `-p my-crate`)
+## Arguments
 
-## Instructions
+- `target-path` (optional) - 目标 crate 路径或包名（如 `crates/my-crate` 或 `-p my-crate`）。如未指定，处理整个工作区。
+
+## Execution
 
 ### 1. 确定目标范围
 
@@ -116,10 +115,23 @@ cargo test -p <package> 2>&1
 - 原因说明...
 ```
 
-## 不要做的事情
+## Constraints
 
 - 不修改公共 API 签名
 - 不修改 `unsafe` 块内的代码
 - 不删除 `#[allow(...)]` 属性
 - 不优化被 feature flag 控制的代码
 - 不添加新功能，只做精简
+
+## Examples
+
+```bash
+# 精简整个工作区
+/rust:simplify
+
+# 精简指定 crate
+/rust:simplify crates/my-crate
+
+# 精简指定包
+/rust:simplify -p my-package
+```

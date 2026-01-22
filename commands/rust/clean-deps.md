@@ -3,7 +3,7 @@ allowed-tools: all
 description: "Clean up Rust dependencies"
 ---
 
-# /clean-deps - Clean up Rust dependencies
+# /rust:clean-deps - Clean up Rust dependencies
 
 ## Purpose
 
