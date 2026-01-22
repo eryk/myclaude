@@ -16,6 +16,7 @@ myclaude/
         ├── commit.md
         ├── review.md
         ├── simplify.md
+        ├── test-coverage.md
         └── clean-deps.md
 ```
 
@@ -123,19 +124,19 @@ myclaude/
 
 ### 2. `/rust:simplify`
 
-精简和优化 Rust 代码，清理未使用的依赖、简化冗余代码、优化 imports。
+遵循 KISS 原则审查并简化 Rust 代码：**能简单就不要复杂，能删除就不要保留**。
 
 **使用方法：**
 ```bash
-/rust:simplify                     # 精简整个工作区
-/rust:simplify crates/my-crate     # 精简指定 crate
-/rust:simplify -p my-package       # 精简指定包
+/rust:simplify                     # 简化 git diff 中的文件
+/rust:simplify src/parser.rs       # 简化指定文件
+/rust:simplify crates/my-crate     # 简化指定 crate
 ```
 
-**精简操作：**
-- 移除未使用的依赖和 feature flags
-- 合并和优化 imports（std → 外部 crate → 本地模块）
-- 简化冗余的代码模式（如 `match` → `?`, 不必要的 `clone()` 等）
+**简化分类（按优先级）：**
+- **P0**: 删除死代码、未使用依赖
+- **P1**: 简化控制流、消除过度抽象
+- **P2**: 优化 imports、Rust 惯用简化
 
 **验证流程：**
 - 每次修改后自动运行 `cargo build`、`cargo clippy`、`cargo test`
@@ -146,32 +147,58 @@ myclaude/
 
 ### 3. `/rust:review`
 
-执行全面的代码审查，关注完整性、质量、架构和安全性。
+执行全面的 Rust 代码审查，关注完整性、质量、架构、安全性和性能。
 
 **使用方法：**
 ```bash
-/rust:review              # 审查当前目录
+/rust:review              # 审查当前分支 diff
 /rust:review src/module   # 审查指定路径
 ```
 
-**审查内容：**
-- 功能完整性分析（TODO、FIXME、未实现功能）
-- 测试质量评估（覆盖率、测试有效性）
-- 代码设计与架构审查（SOLID 原则、DRY、设计模式）
-- 安全审查（输入验证、认证授权、数据保护等）
-- 语言特定检查（`cargo clippy`, `cargo audit`）
-- 文档与可维护性
+**审查维度：**
+- **功能完整性**: TODO、FIXME、`unimplemented!()`、`todo!()`
+- **测试质量**: 覆盖率、断言有效性、冗余测试
+- **代码设计**: SRP、DRY、SOLID 原则
+- **安全审查**: 输入验证、unsafe 代码、依赖漏洞
+- **简化分析**: 死代码、过度抽象、冗长模式
+- **性能分析**: 分配优化、锁竞争、异步阻塞
 
-**输出：**
-- 执行摘要和整体质量评估
-- 关键问题和安全漏洞
-- 功能完整性报告
-- 架构评估
-- 可执行的改进建议
+**严重度分级：**
+- CRITICAL: 安全漏洞、数据竞争
+- HIGH: 性能问题、缺失错误处理
+- MEDIUM: 代码质量、可维护性
+- LOW: 风格偏好、微优化
 
 ---
 
-### 4. `/rust:clean-deps`
+### 4. `/rust:test-coverage`
+
+分析测试覆盖率，识别未覆盖的代码路径，生成测试建议。
+
+**使用方法：**
+```bash
+/rust:test-coverage                # 分析整个工作区
+/rust:test-coverage -p my-crate    # 分析指定包
+/rust:test-coverage 80             # 以 80% 为目标覆盖率
+```
+
+**分析内容：**
+- 函数覆盖（完全未测试的函数）
+- 分支覆盖（未覆盖的条件分支）
+- 错误路径覆盖（未测试的错误处理）
+- 边界条件覆盖（空输入、最大值、溢出）
+
+**输出：**
+- 覆盖率摘要和未覆盖行号
+- 按优先级排序的测试建议（P0-P3）
+- 测试代码模板
+- 覆盖率提升预估
+
+**技术依赖：** `cargo-tarpaulin`
+
+---
+
+### 5. `/rust:clean-deps`
 
 清理未使用的 Rust 依赖和 features。
 
@@ -210,6 +237,7 @@ pip install mlx-whisper
 # Rust 工具链
 cargo install cargo-udeps
 cargo install cargo-audit
+cargo install cargo-tarpaulin
 ```
 
 ---

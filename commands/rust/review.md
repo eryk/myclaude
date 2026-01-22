@@ -1,123 +1,148 @@
 ---
-allowed-tools: all
 description: "Perform thorough code review focusing on completeness, quality, architecture, and security"
 ---
 
-# /rust:review - Perform thorough code review focusing on completeness, quality, architecture, and security
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
 
 ## Purpose
 
-Conduct comprehensive code review examining feature completeness, test quality, code design/architecture, and security to ensure production-ready code with no gaps or vulnerabilities.
-
-## Usage
-
-```
-/rust:review [target-path]
-```
-
-## Arguments
-
-- `target-path` - Path to the code to review (directory, file, or git branch). If not specified, reviews current working directory.
+Conduct comprehensive code review examining feature completeness, test quality, code design/architecture, security, and **Rust-specific performance optimizations** to ensure production-ready code.
 
 ## Execution
 
-**Initial Setup:**
+### 1. Initial Setup
 
-1. Determine current git branch using `git branch --show-current`
-2. Identify base branch (check for `main` or `master` existence)
-3. If on feature branch, get diff scope using `git diff [base-branch] --name-only`
+```bash
+# Determine review scope
+git branch --show-current
+git diff main --name-only  # or master
+```
 
-Use @fullstack-code-reviewer as the primary reviewer with domain-specific experts as needed:
+**Branch-Specific Strategy:**
+- Feature branch: Review only diff against base branch
+- Main/master: Review `target-path` or current directory
 
-- For Rust/backend: @rust-backend-expert
-- For web frontend: @ui-engineer
-- For macOS apps: @macos-app-developer
-- For system architecture: @scalable-system-architect
+### 2. Review Dimensions
 
-### Review Process
+#### A. Feature Completeness Analysis
 
-**Branch-Specific Review Strategy:**
+- Scan for `TODO`, `FIXME`, `unimplemented!()`, `todo!()`
+- Verify all features are fully implemented (no placeholder code)
+- Validate error handling covers all edge cases
 
-- If current branch is base branch (`main` or `master`): Review entire codebase based on `target-path`.
-- If current branch is feature branch: Review only diff against base branch using `git diff main` or `git diff master`
+#### B. Test Quality Assessment
 
-1. **Feature Completeness Analysis**
-   - Scan codebase for TODO comments, FIXME markers, and unimplemented functions
-   - Verify all features are fully implemented (no placeholder/simulated code)
-   - Check that all requirements from specs/epics are addressed
-   - Validate error handling covers all edge cases
-   - Ensure no critical functionality is missing or incomplete
+- Analyze test coverage for main flows
+- Identify useless/redundant tests
+- Verify unit tests cover edge cases
+- Check integration tests for critical paths
+- Ensure assertions are meaningful
 
-2. **Test Quality Assessment**
-   - Analyze test coverage for main application flows
-   - Identify and flag useless/redundant tests that don't add value
-   - Verify unit tests cover individual components thoroughly
-   - Check integration tests cover critical user journeys
-   - Ensure test assertions are meaningful and specific
-   - Validate test data setup and teardown practices
-   - Review mocking strategies and test isolation
+#### C. Code Design & Architecture
 
-3. **Code Design & Architecture Review**
-   - **Single Responsibility Principle (SRP)**: Each class/module has one reason to change
-   - **Don't Repeat Yourself (DRY)**: Identify and flag code duplication
-   - **Open/Closed Principle**: Code open for extension, closed for modification
-   - **Dependency Inversion**: Depend on abstractions, not concretions
-   - **Separation of Concerns**: Clear boundaries between layers/modules
-   - **SOLID principles** adherence throughout codebase
-   - **Clean Code practices**: Naming, function size, complexity
-   - **Design patterns** appropriate usage and implementation
-   - **Code organization** and module structure
-   - **Performance considerations** and optimization opportunities
+- **SRP**: Each module has one responsibility
+- **DRY**: Flag code duplication
+- **Separation of Concerns**: Clear layer boundaries
+- **SOLID principles** adherence
+- Module organization and visibility
 
-4. **Security Review**
-   - **Input Validation**: All user inputs properly validated and sanitized
-   - **Authentication & Authorization**: Proper access controls and session management
-   - **Data Protection**: Sensitive data encryption at rest and in transit
-   - **SQL Injection**: Parameterized queries and ORM usage
-   - **XSS Prevention**: Output encoding and CSP headers
-   - **CSRF Protection**: Anti-CSRF tokens and same-origin policies
-   - **Dependency Vulnerabilities**: Check for known security issues in dependencies
-   - **Error Information Disclosure**: Ensure error messages don't leak sensitive info
-   - **Logging Security**: No sensitive data in logs, proper log access controls
-   - **Configuration Security**: Secure defaults and environment-specific configs
-   - **API Security**: Rate limiting, proper HTTP methods, secure endpoints
+#### D. Security Review
 
-5. **Language-Specific Checks**
-   - **Rust**: Run `cargo clippy --all-features`, `cargo audit`, check for unsafe code usage
-   - **JavaScript/TypeScript**: ESLint rules, TypeScript strict mode, npm audit
-   - **Python**: Black formatting, pylint, bandit security linting
-   - **General**: Static analysis tools appropriate for the language
+- Input validation and sanitization
+- Authentication & authorization
+- Unsafe code justification and documentation
+- Dependency vulnerabilities (`cargo audit`)
+- No sensitive data in logs/errors
 
-6. **Documentation & Maintainability**
-   - Code comments explain "why" not "what"
-   - Public APIs have clear documentation
-   - README and setup instructions are complete
-   - Code is self-documenting with clear naming
+#### E. Rust Simplification Analysis
 
-### Review Deliverables
+| Category | Look For | Fix |
+|----------|----------|-----|
+| **Redundant Code** | Dead code, unused imports | Remove or `#[allow(dead_code)]` with reason |
+| **Over-abstraction** | Traits for single impl, excessive generics | Simplify to concrete types |
+| **Verbose Patterns** | Manual loops vs iterators | `for i in 0..v.len()` → `v.iter()` |
+| **Unnecessary Clones** | `.clone()` where borrow suffices | Use references |
+| **Complex Conditionals** | Nested if/else | Early returns, pattern matching |
+| **Boilerplate** | Manual `Debug`/`Default` | `#[derive(...)]` |
 
-Generate a comprehensive review report including:
+#### F. Rust Performance Analysis
 
-1. **Executive Summary** - High-level findings and overall code quality assessment
-2. **Critical Issues** - Security vulnerabilities and blocking issues requiring immediate attention
-3. **Feature Completeness Report** - Missing implementations and incomplete features
-4. **Test Quality Analysis** - Coverage gaps, test improvements, and testing strategy recommendations
-5. **Architecture Assessment** - Design principle violations and architectural improvements
-6. **Security Findings** - Detailed security analysis with risk levels and remediation steps
-7. **Code Quality Metrics** - Complexity, maintainability, and technical debt assessment
-8. **Actionable Recommendations** - Prioritized list of improvements with implementation guidance
+| Category | Look For | Severity |
+|----------|----------|----------|
+| **Allocation** | Missing `Vec::with_capacity`, repeated `String` allocs | HIGH |
+| **Copying** | Expensive copies in hot paths, missing `Cow` | HIGH |
+| **Locking** | Lock contention, `std::sync` vs `parking_lot` | HIGH |
+| **Iteration** | `collect()` then iterate, `.iter().filter().collect().len()` | MEDIUM |
+| **Boxing** | Unnecessary `Box<dyn Trait>` | MEDIUM |
+| **Bounds Checks** | Repeated indexing in hot loops | MEDIUM |
+| **String Ops** | `format!` in loops, `+` concatenation | MEDIUM |
+| **Async** | Blocking in async, unnecessary `.await` | HIGH |
 
-### Exit Criteria
+#### G. Language-Specific Checks
+
+```bash
+cargo clippy --all-features -- -D warnings
+cargo audit
+cargo fmt --check
+```
+
+### 3. Severity Assignment
+
+| Severity | Criteria |
+|----------|----------|
+| **CRITICAL** | Security vulnerabilities, data races, blocking bugs |
+| **HIGH** | Significant performance impact, missing error handling |
+| **MEDIUM** | Code quality, maintainability concerns |
+| **LOW** | Style preferences, minor optimizations |
+
+### 4. Review Deliverables
+
+Generate report with:
+
+1. **Executive Summary** - Overall quality assessment
+2. **Critical Issues** - Security/blocking issues requiring immediate fix
+3. **Feature Completeness** - Missing implementations
+4. **Performance Findings** - Optimization opportunities with before/after examples
+5. **Simplification Opportunities** - Code reduction suggestions
+6. **Actionable Recommendations** - Prioritized by impact/effort
+
+### 5. Exit Criteria
 
 Code review passes when:
 
-- ✅ Zero TODO/FIXME comments in production code
-- ✅ All features fully implemented with no simulation/placeholder code
-- ✅ Test coverage >80% for main flows with meaningful assertions
-- ✅ No critical or high-severity security vulnerabilities
-- ✅ All SOLID principles followed with minimal violations
-- ✅ Static analysis tools pass without warnings
-- ✅ No code duplication beyond acceptable thresholds
-- ✅ All dependencies up-to-date with no known vulnerabilities
-- ✅ Error handling comprehensive for all edge cases
-- ✅ Documentation complete and accurate
+- ✅ Zero `TODO`/`FIXME`/`unimplemented!()` in production code
+- ✅ All features fully implemented
+- ✅ Test coverage >80% for main flows
+- ✅ No critical/high security vulnerabilities
+- ✅ `cargo clippy` passes without warnings
+- ✅ `cargo audit` shows no vulnerabilities
+- ✅ No unnecessary allocations in hot paths
+- ✅ Error handling comprehensive
+- ✅ No code duplication beyond threshold
+
+## Operating Principles
+
+### What to Focus On
+
+- **Pragmatic**: Meaningful improvements over nitpicks
+- **Context-aware**: Hot path vs setup code
+- **Specific**: Every finding has clear fix
+- **Rust-idiomatic**: Leverage zero-cost abstractions
+
+### What NOT to Suggest
+
+- Comments on self-explanatory code
+- Renaming for minor style preferences
+- Generics for single-type usage
+- Premature optimization in cold paths
+- Over-engineering simple code
+
+## Context
+
+$ARGUMENTS
