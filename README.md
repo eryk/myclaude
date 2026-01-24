@@ -17,6 +17,7 @@ myclaude/
 ├── commands/        # 自定义命令模板
 │   ├── update-codemaps.md
 │   ├── update-docs.md
+│   ├── tdd.md
 │   └── rust/        # Rust 相关命令
 │       ├── commit.md
 │       ├── review.md
@@ -199,6 +200,42 @@ myclaude/
 - 提取环境变量和配置选项
 - 保留手动添加的文档内容
 - 标记 90 天未更新的过时文档
+
+---
+
+### `/tdd`
+
+严格执行测试驱动开发（TDD）流程。支持 Rust、C++、Python 项目。
+
+**使用方法：**
+```bash
+/tdd 实现一个计算市场流动性评分的函数
+/tdd 添加用户认证模块
+```
+
+**TDD 循环：**
+```
+RED → GREEN → REFACTOR → REPEAT
+
+RED:      先写失败的测试（测试必须失败）
+GREEN:    写最少代码让测试通过
+REFACTOR: 重构代码，保持测试通过
+REPEAT:   下一个功能/场景
+```
+
+**语言支持：**
+
+| 语言 | 测试框架 | 属性测试 |
+|------|----------|----------|
+| Rust | `cargo test` | proptest, quickcheck |
+| C++ | Google Test, Catch2 | RapidCheck |
+| Python | pytest | hypothesis |
+
+**覆盖率要求：**
+- **80%** - 普通代码最低要求
+- **100%** - 金融计算、认证逻辑、安全关键代码
+
+**核心原则：** 测试必须在实现之前编写。永远不要跳过 RED 阶段。
 
 ---
 
