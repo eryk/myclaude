@@ -16,6 +16,7 @@ myclaude/
 │   └── youtube-summarizer/
 ├── commands/        # 自定义命令模板
 │   ├── update-codemaps.md
+│   ├── update-docs.md
 │   └── rust/        # Rust 相关命令
 │       ├── commit.md
 │       ├── review.md
@@ -166,6 +167,38 @@ myclaude/
 - **Rust**：crate 边界、trait 层次、错误类型
 - **C++**：命名空间、头文件接口、CMake 目标
 - **Python**：包结构、协议/ABC 层次、入口点
+
+---
+
+### `/update-docs`
+
+从配置文件（source of truth）同步生成项目文档。支持 Rust、C++、Python 及混合项目。
+
+**使用方法：**
+```bash
+/update-docs              # 同步所有文档
+/update-docs --check      # 仅检查过时文档
+```
+
+**数据源（Source of Truth）：**
+
+| 语言 | 配置文件 |
+|------|----------|
+| Rust | `Cargo.toml`, lib.rs 文档注释 |
+| C++ | `CMakeLists.txt`, `vcpkg.json`, `conanfile` |
+| Python | `pyproject.toml`, `setup.py`, `requirements.txt` |
+| 通用 | `.env.example`, 配置模板文件 |
+
+**生成文档：**
+- `docs/CONTRIBUTING.md` - 开发指南（环境搭建、代码规范、测试流程）
+- `docs/RUNBOOK.md` - 运维手册（构建部署、配置说明、故障排查）
+- `docs/API.md` - API 参考（仅库项目）
+
+**特性：**
+- 自动检测项目语言和构建系统
+- 提取环境变量和配置选项
+- 保留手动添加的文档内容
+- 标记 90 天未更新的过时文档
 
 ---
 
