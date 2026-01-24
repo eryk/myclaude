@@ -6,18 +6,23 @@
 
 ```
 myclaude/
+├── agents/          # 自定义 Agents
+│   ├── code-reviewer.md
+│   └── refactor-cleaner.md
 ├── skills/          # Claude Agent Skills
 │   ├── iterm-reader/
 │   ├── skill-writer/
 │   ├── x-thread-reader/
 │   └── youtube-summarizer/
-└── commands/        # 自定义命令模板
-    └── rust/        # Rust 相关命令
-        ├── commit.md
-        ├── review.md
-        ├── simplify.md
-        ├── test-coverage.md
-        └── clean-deps.md
+├── commands/        # 自定义命令模板
+│   ├── update-codemaps.md
+│   └── rust/        # Rust 相关命令
+│       ├── commit.md
+│       ├── review.md
+│       ├── simplify.md
+│       ├── test-coverage.md
+│       └── clean-deps.md
+└── sync-to-claude.sh  # 同步脚本
 ```
 
 ## ✨ 技能清单
@@ -99,6 +104,68 @@ myclaude/
 - yt-dlp（`brew install yt-dlp` 或 `pip install yt-dlp`）
 - mlx-whisper（`pip install mlx-whisper`）- 仅用于无字幕视频转录
 - macOS with Apple Silicon（M1/M2/M3/M4）- mlx-whisper 依赖
+
+---
+
+## 🤖 自定义 Agents
+
+### 1. Code Reviewer (`code-reviewer`)
+
+专业代码审查 Agent，关注代码质量、安全性和可维护性。
+
+**自动检查：**
+- **安全检查**：硬编码凭证、SQL 注入、XSS、路径遍历
+- **代码质量**：大函数（>50行）、深层嵌套（>4层）、缺失错误处理
+- **性能问题**：低效算法、缺失缓存、N+1 查询
+- **最佳实践**：命名规范、魔法数字、缺失文档
+
+**输出格式：**
+- CRITICAL：安全漏洞、数据竞争（必须修复）
+- HIGH：性能问题、缺失错误处理（应该修复）
+- MEDIUM：代码质量、可维护性（建议修复）
+
+---
+
+### 2. Refactor Cleaner (`refactor-cleaner`)
+
+死代码清理和重构专家，自动识别和安全移除未使用的代码。
+
+**核心功能：**
+- 死代码检测（使用 knip、depcheck、ts-prune）
+- 重复代码识别和合并
+- 未使用依赖清理
+- 安全重构（带回滚机制）
+
+**工作流程：**
+1. 运行检测工具分析
+2. 按风险级别分类（SAFE / CAREFUL / RISKY）
+3. 每批次修改后运行测试
+4. 记录所有删除到 DELETION_LOG.md
+
+---
+
+## 📋 通用命令
+
+### `/update-codemaps`
+
+分析代码库结构并生成/更新架构文档（codemaps）。支持 Rust、C++、Python 及混合项目。
+
+**使用方法：**
+```bash
+/update-codemaps              # 分析整个项目
+/update-codemaps src/         # 分析指定目录
+```
+
+**生成文档：**
+- `codemaps/architecture.md` - 系统整体设计
+- `codemaps/modules.md` - 模块/包分解
+- `codemaps/data-flow.md` - 数据结构和流向
+- `codemaps/entry-points.md` - CLI/API/库入口
+
+**支持语言：**
+- **Rust**：crate 边界、trait 层次、错误类型
+- **C++**：命名空间、头文件接口、CMake 目标
+- **Python**：包结构、协议/ABC 层次、入口点
 
 ---
 
@@ -243,6 +310,21 @@ cargo install cargo-tarpaulin
 ---
 
 ## 🚀 使用方法
+
+### 自动同步（推荐）
+
+使用 `sync-to-claude.sh` 脚本一键同步所有配置到 `~/.claude/`：
+
+```bash
+./sync-to-claude.sh
+```
+
+该脚本会：
+1. 显示将要同步的更改（dry-run）
+2. 确认后同步 `agents/`、`skills/`、`commands/` 到 `~/.claude/`
+3. 使用 `--delete` 确保两侧完全一致
+
+### 手动安装
 
 1. **个人 Skills**：将 `skills/` 目录复制到 `~/.claude/skills/`
 2. **项目 Skills**：将 `skills/` 目录复制到项目根目录的 `.claude/skills/`
